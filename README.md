@@ -83,6 +83,8 @@ In order to submit Crab job you should:
 * Initialize crab environment `source /cvmfs/cms.cern.ch/common/crab-setup.sh`
 * `python Crab_TrgEff_Data.py`
 
+For installation of grid certificate visit [here](https://www.sdcc.bnl.gov/information/getting-started/installing-your-grid-certificate).
+
 After submitting crab jobs you can check the status using fillowing command
 
 `crab st -d crab_projects/crab_Run2018D-v1`
