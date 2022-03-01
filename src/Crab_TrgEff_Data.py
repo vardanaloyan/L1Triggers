@@ -15,10 +15,10 @@ config.JobType.allowUndistributedCMSSW = True
 
 config.Data.inputDataset = ''
 config.Data.inputDBS = 'global'
-config.Data.splitting = 'LumiBased'
-config.Data.unitsPerJob = 10
-#config.Data.splitting = 'Automatic'
-config.Data.lumiMask = '/afs/cern.ch/user/a/aloyan/public/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
+#config.Data.splitting = 'LumiBased'
+#config.Data.unitsPerJob = 10
+config.Data.splitting = 'Automatic'
+config.Data.lumiMask = '/afs/cern.ch/user/a/aloyan/public/json_DCSONLY.txt'
 config.Data.publication = False
 config.Data.outputDatasetTag = 'CRAB3_Analaysis'
 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     from CRABAPI.RawCommand import crabCommand
     for dataset in [
-                    '/ZeroBias/Run2018D-v1/RAW',
+                    '/EphemeralZeroBias1/Run2018D-v1/RAW',
                    ]:
         config.Data.inputDataset = dataset
         config.General.requestName = dataset.split('/')[2]

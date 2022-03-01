@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: l1Ntuple -s RAW2DIGI --python_filename=data.py -n -1 --no_output --era=Run2_2018 --data --conditions=112X_dataRun2_v7 --customise=L1Trigger/Configuration/customiseReEmul.L1TReEmulFromRAW --customise=L1Trigger/L1TNtuples/customiseL1Ntuple.L1NtupleRAWEMU --filein=file:/eos/cms/store/data/Run2018D/store/data/Run2018D/ZeroBias/RAW/v1/000/325/240/00000/4E953DE3-A07E-6F45-94F4-E530035D3757.root
+# with command line options: l1Ntuple -s RAW2DIGI --python_filename=data.py -n -1 --no_output --era=Run2_2018 --data --conditions=112X_dataRun2_v7 --customise=L1Trigger/Configuration/customiseReEmul.L1TReEmulFromRAW --customise=L1Trigger/L1TNtuples/customiseL1Ntuple.L1NtupleRAWEMU --customise=L1Trigger/Configuration/customiseSettings.L1TSettingsToCaloParams_2018_v1_3 --filein=file:/eos/cms/store/data/Run2018D/store/data/Run2018D/ZeroBias/RAW/v1/000/325/240/00000/4E953DE3-A07E-6F45-94F4-E530035D3757.root
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.Eras.Era_Run2_2018_cff import Run2_2018
@@ -95,6 +95,12 @@ from L1Trigger.L1TNtuples.customiseL1Ntuple import L1NtupleRAWEMU
 
 #call to customisation function L1NtupleRAWEMU imported from L1Trigger.L1TNtuples.customiseL1Ntuple
 process = L1NtupleRAWEMU(process)
+
+# Automatic addition of the customisation function from L1Trigger.Configuration.customiseSettings
+from L1Trigger.Configuration.customiseSettings import L1TSettingsToCaloParams_2018_v1_3 
+
+#call to customisation function L1TSettingsToCaloParams_2018_v1_3 imported from L1Trigger.Configuration.customiseSettings
+process = L1TSettingsToCaloParams_2018_v1_3(process)
 
 # End of customisation functions
 

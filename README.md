@@ -1,24 +1,111 @@
-# Trigger Rate and Efficiency calculations
+# Trigger Rate calculations
 
 Plan
 
-1. Rate/Pure-Rate calculation with data
-2. Rate/Pure-Rate calculation with mc (All)
-3. Efficiency calculations with mc (signal)
+1. Rate calculation MC
+2. Rate calculation DATA
+   - NTuple making
+   - Rate calculation
+    
+
+## Rate calculation MC
+
+Using [HowToL1TriggerMenu](https://twiki.cern.ch/twiki/bin/viewauth/CMS/HowToL1TriggerMenu#4_2_Set_up_your_system_and_confi)
+instructions.
+
+```bash
+ssh -XY your_name@lxplus.cern.ch
+
+# 1. Setting up the environment 
+cmsrel CMSSW_12_3_0_pre1
+cd CMSSW_12_3_0_pre1/src
+cmsenv
+git cms-init
+git remote add cms-l1t-offline git@github.com:cms-l1t-offline/cmssw.git
+git fetch cms-l1t-offline l1t-integration-CMSSW_12_3_0
+git cms-merge-topic -u cms-l1t-offline:l1t-integration-v119.0
+git clone https://github.com/cms-l1t-offline/L1Trigger-L1TCalorimeter.git L1Trigger/L1TCalorimeter/data
+git cms-checkdeps -A -a
+scram b -j 8
+
+# 2. Setting up the MenuTools environment (NOTE: logout and then go back to CMSSW_12_3_0_pre1/src; no cmsenv)
+git clone --depth 1 https://github.com/cms-l1-dpg/L1MenuTools.git
+cd L1MenuTools/rate-estimation
+
+# 3. Translating a menu XML file into C++ code
+wget https://raw.githubusercontent.com/cms-l1-dpg/L1MenuRun3/master/development/L1Menu_Collisions2022_v0_1_2/L1Menu_Collisions2022_v0_1_2.xml . # alternatively: place your custom menu XML here
+bash configure.sh L1Menu_Collisions2022_v0_1_2.xml  # alternatively: provide your custom menu XML
+
+# 4. Compile the rate estimation framework with your custom menulib.* files
+cmsenv
+mkdir -p objs/include
+make -j 8
+
+Every time you modify your menu, run:
+
+#Assume the user is at L1MenuTools/rate-estimation/
+
+#1. Translating a menu XML file into C++ code
+bash configure.sh L1Menu_Collisions2022_v0_1_2.xml # alternatively: provide your custom menu XML
+
+# 2. Compile the rate estimation framework with your custom menulib.* files
+cmsenv
+mkdir -p objs/include
+make -j 8
+```
 
 
-## 1. Trigger Rate calculations with data
 
-This part was done using twiki [HowToL1TriggerMenu](https://twiki.cern.ch/twiki/bin/viewauth/CMS/HowToL1TriggerMenu) documentation and consists of two steps
+##  Every time you modify your menu, run: 
 
-* Ntuple making process
-* Rate calculations (based on Ntuples, built in the first step)
+```bash
+# Assume the user is at L1MenuTools/rate-estimation/
 
-### 1.1 Ntuple making process
+#1. Translating a menu XML file into C++ code
+bash configure.sh L1Menu_Collisions2022_v0_1_2.xml # alternatively: provide your custom menu XML
+
+# 2. Compile the rate estimation framework with your custom menulib.* files
+cmsenv
+mkdir -p objs/include
+make -j 8
+```
+
+After running the command
+```bash
+./testMenu2016 -m menu/Prescale_2022_v0_1_2.csv -l ntuple/Run3_NuGun_MC_ntuples.list -o testoutput -b 2544 --doPlotRate --doPlotEff --maxEvent 20000 --SelectCol 2E+34 --doPrintPU --allPileUp --doReweightingRun3
+```
+
+I get the following results (Wrapped)
+
+```text
+...
+357       L1_DoubleJet_110_35_DoubleJet35_Mass_Min620                     1         17538.1    +/- 5042.31             3545.32        7957.98        16             
+358       L1_DoubleJet_115_40_DoubleJet40_Mass_Min620                     1         12970.4    +/- 4336.27             0              3901.5         10             
+359       L1_DoubleJet_120_45_DoubleJet45_Mass_Min620                     1         6524.15    +/- 3075.4              0              1301.97        7              
+360       L1_DoubleJet_115_40_DoubleJet40_Mass_Min620_Jet60TT28           1         7478.65    +/- 3292.69             0              1641.69        5              
+361       L1_DoubleJet_120_45_DoubleJet45_Mass_Min620_Jet60TT28           1         3737       +/- 2327.56             0              394.478        3              
+363       L1_DoubleJet35_Mass_Min450_IsoTau45_RmOvlp                      0         0          +/- 0                   0              0              0              
+364       L1_DoubleJet_80_30_Mass_Min420_IsoTau40_RmOvlp                  0         0          +/- 0                   0              0              0              
+365       L1_DoubleJet_80_30_Mass_Min420_Mu8                              0         0          +/- 0                   0              0              0              
+366       L1_DoubleJet_80_30_Mass_Min420_DoubleMu0_SQ                     0         0          +/- 0                   0              0              0              
+372       L1_TripleJet_95_75_65_DoubleJet_75_65_er2p5                     1         1398.32    +/- 1423.78             372.349        796.451        3              
+373       L1_TripleJet_100_80_70_DoubleJet_80_70_er2p5                    1         0          +/- 0                   0              0              0              
+374       L1_TripleJet_105_85_75_DoubleJet_85_75_er2p5                    1         0          +/- 0                   0              0              0              
+376       L1_QuadJet_95_75_65_20_DoubleJet_75_65_er2p5_Jet20_FWD3p0       1         1025.97    +/- 1219.57             0              424.101        2              
+382       L1_QuadJet60er2p5                                               0         0          +/- 0                   0              0              0              
+...
+```
+
+## Rate calculation DATA
+
+### NTuple making
+
+
+### 1 Ntuple making process
 
 This step was done according to twiki [SWGuideL1TStage2Instructions](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideL1TStage2Instructions) documentation
 
-#### 1.1.1 Environment setup
+#### 1.1 Environment setup
 Navigate to
 
 	 ->  Environment Setup with Integration Tags -> CMSSW_11_2_0 
@@ -50,7 +137,8 @@ In case if you will have git related problems you should connect your local git 
 
 Recommended GlobalTag for run2 data reprocessing is `112X_dataRun2_v7`
 
-#### 1.1.2 Processing script generation
+
+#### 1.2 Processing script generation
 Navigate to
 
 	 -> L1T Cookbook: current recipes -> Re-emulating 2018 data with the new 2018 CaloParams and conditions 
@@ -58,45 +146,21 @@ Navigate to
 Following command used to generate processing script
 
 ```
-cmsDriver.py l1Ntuple -s RAW2DIGI --python_filename=data.py -n -1 --no_output --era=Run2_2018 --data --conditions=112X_dataRun2_v7 --customise=L1Trigger/Configuration/customiseReEmul.L1TReEmulFromRAW --customise=L1Trigger/L1TNtuples/customiseL1Ntuple.L1NtupleRAWEMU --customise=L1Trigger/Configuration/customiseSettings.L1TSettingsToCaloParams_2018_v1_3 --filein=file:/eos/cms/store/data/Run2018D/store/data/Run2018D/ZeroBias/RAW/v1/000/325/240/00000/4E953DE3-A07E-6F45-94F4-E530035D3757.root
+cmsDriver.py l1Ntuple -s RAW2DIGI --python_filename=data.py -n -1 --no_output --era=Run2_2018 --data --conditions=112X_dataRun2_v7 --customise=L1Trigger/Configuration/customiseReEmul.L1TReEmulFromRAW --customise=L1Trigger/L1TNtuples/customiseL1Ntuple.L1NtupleRAWEMU --filein=file:/eos/cms/store/data/Run2018D/store/data/Run2018D/ZeroBias/RAW/v1/000/325/240/00000/4E953DE3-A07E-6F45-94F4-E530035D3757.root
 ```
+
 This will generate [data.py](./src/data.py) file.
 Do not pay attention if the command would not execute successfully due to some networking issues. Important to have generated `data.py` file.
 
-#### 1.1.3 Submiting crab jobs for making NTuples
+#### 1.3 Submiting crab jobs for making NTuples
 
 For crab jobs we are using this [`Crab_TrgEff_Data.py`](./src/Crab_TrgEff_Data.py) file. 
 In this configuration we are using following dataset
 
-`/ZeroBias/Run2018D-v1/RAW`
+`/EphemeralZeroBias1/Run2018D-v1/RAW`
 
-You can find information about datasets from [CMSWEB](https://cmsweb.cern.ch/das) site.
-
-In this configuration we are using following [`Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt`](./src/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt) file for good lumis.
-
-You can find more json files from [here](https://cms-service-dqmdc.web.cern.ch/CAF/certification/Collisions18/13TeV/).
-
-
-In order to submit Crab job you should:
-
-* `cmsenv`
-* Initialize crab environment `source /cvmfs/cms.cern.ch/common/crab-setup.sh`
-* `python Crab_TrgEff_Data.py`
-
-For installation of grid certificate visit [here](https://www.sdcc.bnl.gov/information/getting-started/installing-your-grid-certificate).
-
-After submitting crab jobs you can check the status using fillowing command
-
-`crab st -d crab_projects/crab_Run2018D-v1`
-
-If ready you can get the output using following command
-
-`crab out -d crab_projects/crab_Run2018D-v1 --jobids 500`
-
-
-#### 1.1.4 Making the list of output files
-
-If the previous step was successfully done, You can filelist of the filenames using following [script](./src/llist).
+After getting the NTuples, I prepared simple script to gather the filepaths of those NTuples.
+I saved this as `llist` file
 
 ```python
 #!/usr/bin/env python3
@@ -118,113 +182,17 @@ for i in glob.glob(sys.argv[1]):
 
 ```
 
-In my case the command was
+The usage of the script is the following (for example my Ntuples are in `"/eos/user/a/aloyan/2021/trigger/crab_projects/crab_Run2018D-v1/results/*.root" >> ~/files.txt`)
 
-`llist "/eos/user/a/aloyan/2021/ntuple/crab_Run2018D-v1/results/L1Ntuple_*.root" > ntuple.txt`
+I will run the command to get the filenames
 
-Below you can find [ntuple.txt](./src/ntuple.txt) file.
+`llist "/eos/user/a/aloyan/2021/trigger/crab_projects/crab_Run2018D-v1/results/*.root" >> ~/files.txt`
 
-This was the last step of Ntuple making process. 
+Then You need to move the `files.txt` file into `CMSSW_12_3_0_pre1/src/L1MenuTools` directory and run the the command 
+for rate calculation mentioned in the first part of this doc.
 
-In the next section we would need `ntuple.txt` file to be there.
-
-### 1.2 Rate calculations
-
-For rate calculations we should keep using [HowToL1TriggerMenu](https://twiki.cern.ch/twiki/bin/viewauth/CMS/HowToL1TriggerMenu) documentation.
-
-We are going to use `CMSSW_11_1_5` version.
-
-This part consists of several steps:
-
-* Setup an environment
-* Copying `ntuple.txt` into working directory
-* Prescale table making
-* Copying menu.xml into working directory
-* Compilation
-* Running command for rate calculation
-
-#### 1.2.1 Setup an environment
-
-Navigate to
-
-	 ->  3. Run 3 setting ->  3.2 Set up your system and prepare an existing menu for rate estimation 
-	 
-And setup the environment
-
-```
-ssh -XY your_name@lxplus.cern.ch
-
-# 1. Setting up the environment and folder structure
-cmsrel CMSSW_11_1_5
-cd CMSSW_11_1_5/src/
-git clone --depth 1 https://github.com/cms-l1-dpg/L1MenuTools.git
-cd L1MenuTools/rate-estimation/
-
-# 2. Translating a menu XML file into C++ code
-wget https://raw.githubusercontent.com/cms-l1-dpg/L1MenuRun3/master/development/L1Menu_Collisions2022_v0_1_1/L1Menu_Collisions2022_v0_1_1.xml  # alternatively: place your custom menu XML here
-bash configure.sh L1Menu_Collisions2022_v0_1_1.xml  # alternatively: provide your custom menu XML
-
-# 3. Compile the rate estimation framework with your custom menulib.* files
-cmsenv
-mkdir -p objs/include
-make -j 8
-
-```
-
-#### 1.2.2 Copying `ntuple.txt` into working directory
-
-Now copy `ntuple.txt` file into `CMSSW_11_1_5/src/L1MenuTools/rate-estimation/ntuple` directory.
+`./testMenu2016 -m menu/Prescale_2022_v0_1_2.csv -l ntuple/files.txt -o testoutput -b 2544 --doPlotRate --doPlotEff --maxEvent 20000 --SelectCol 2E+34 --doPrintPU --allPileUp`
 
 
-#### 1.2.3 Prescale table making
-
-Navigate to
-
-	 ->  3. Run 3 setting -> 3.3.3 Prescale table 
-	 
-```
-
-
-cd L1MenuTools/pstools
-bash run-ps-generate.sh \
-  https://github.com/cms-l1-dpg/L1Menu2018/raw/master/official/PrescaleTables/PrescaleTable-1_L1Menu_Collisions2018_v2_1_0.xlsx \
-  https://raw.githubusercontent.com/cms-l1-dpg/L1MenuRun3/master/development/L1Menu_Collisions2022_v0_1_1/L1Menu_Collisions2022_v0_1_1.xml \
-  --output Prescale_2022_v0_1_1
-``` 
-
-#### 1.2.4 Copying menu.xml into working directory
-
-In this documentation I will use default xml, which used in twiki documenatation
-
-#### 1.2.5 Compilation
-
-##### Every time you modify your menu, run:
-
-```
-#Assume the user is at L1MenuTools/rate-estimation/
-
-#1. Translating a menu XML file into C++ code
-bash configure.sh L1Menu_Collisions2022_v0_1_1.xml # alternatively: provide your custom menu XML
-
-# 2. Compile the rate estimation framework with your custom menulib.* files
-cmsenv
-mkdir -p objs/include
-make -j 8
-
-```
-
-#### 1.2.6 Running command for rate calculation
-
-	./testMenu2016 -m menu/Prescale_2022_v0_1_1.csv -l ntuple/ntuple.txt -o testoutput -b 2544 --doPlotRate --doPlotEff --SelectCol 2E+34
-
-You can find [here](./src/testoutput.txt) sample output of the above command.
-
-### SUMMARY
-
-Steps which need to repeat during the testings are:
-
-* 1.2.3 
-* 1.2.4
-* 1.2.5
-* 1.2.6
+Unfortunately results are still unsatisfying due to the -1 values in `results/?_PU.csv` file.
 
